@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		EB40B05530756E28001DD09E /* PROJECT_NOTES.md in Resources */ = {isa = PBXBuildFile; fileRef = EB40B05430756E28001DD09E /* PROJECT_NOTES.md */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		EB35169E3058411D00B0F290 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +31,7 @@
 		EB3516903058411B00B0F290 /* composer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = composer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EB35169D3058411D00B0F290 /* composerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = composerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EB3516A73058411D00B0F290 /* composerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = composerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		EB40B05430756E28001DD09E /* PROJECT_NOTES.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = PROJECT_NOTES.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -75,6 +80,7 @@
 		EB3516873058411B00B0F290 = {
 			isa = PBXGroup;
 			children = (
+				EB40B05430756E28001DD09E /* PROJECT_NOTES.md */,
 				EB3516923058411B00B0F290 /* composer */,
 				EB3516A03058411D00B0F290 /* composerTests */,
 				EB3516AA3058411D00B0F290 /* composerUITests */,
@@ -212,6 +218,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EB40B05530756E28001DD09E /* PROJECT_NOTES.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

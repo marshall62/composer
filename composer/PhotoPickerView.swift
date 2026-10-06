@@ -14,16 +14,12 @@ struct PhotoPickerView: View {
     @State private var selectedUIImage: UIImage?
     @State private var showPhotoPicker = false
 
-    private var aspectRatio: CGFloat {
-        CGFloat(canvasSettings.width / canvasSettings.height)
-    }
 
     var body: some View {
         Group {
             if let selectedUIImage {
                 CropView(
                     uiImage: selectedUIImage,
-                    aspectRatio: aspectRatio,
                     canvasWidth: canvasSettings.width,
                     canvasHeight: canvasSettings.height,
                     gridType: canvasSettings.gridType,

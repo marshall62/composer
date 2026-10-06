@@ -8,26 +8,44 @@ import SwiftUI
 
 struct CropView: View {
     let uiImage: UIImage
-    let aspectRatio: CGFloat
     let canvasWidth: Double
     let canvasHeight: Double
     let gridType: GridType
     let onChooseNewPhoto: () -> Void
 
-    private var image: Image { Image(uiImage: uiImage) }
-    private var imageSize: CGSize { uiImage.size }
+    @State private var currentCanvasWidth: Double
+    @State private var currentCanvasHeight: Double
 
     @State private var proposedRect: CGRect?
     @State private var creatingNewRect = false
-    @State private var hasReleasedInitialDrag = false
     @State private var resizeAnchor: CGPoint?
     @State private var rectAtDragStart: CGRect?
     @State private var croppedUIImage: UIImage?
 
+    private var aspectRatio: CGFloat { CGFloat(currentCanvasWidth / currentCanvasHeight) }
+    private var image: Image { Image(uiImage: uiImage) }
+    private var imageSize: CGSize { uiImage.size }
+
+    init(uiImage: UIImage, canvasWidth: Double, canvasHeight: Double, gridType: GridType, onChooseNewPhoto: @escaping () -> Void) {
+        self.uiImage = uiImage
+        self.canvasWidth = canvasWidth
+        self.canvasHeight = canvasHeight
+        self.gridType = gridType
+        self.onChooseNewPhoto = onChooseNewPhoto
+        _currentCanvasWidth = State(initialValue: canvasWidth)
+        _currentCanvasHeight = State(initialValue: canvasHeight)
+    }
+
+    private func resetCropInProgress() {
+        proposedRect = nil
+        creatingNewRect = false
+        resizeAnchor = nil
+        rectAtDragStart = nil
+    }
+
     var body: some View {
         if let cropped = croppedUIImage {
-            GriddedCropView(uiImage: cropped, canvasWidth: canvasWidth, canvasHeight: canvasHeight, gridType: gridType, onChooseNewPhoto: onChooseNewPhoto)
-
+            GriddedCropView(uiImage: cropped, canvasWidth: currentCanvasWidth, canvasHeight: currentCanvasHeight, gridType: gridType, onChooseNewPhoto: onChooseNewPhoto)
         } else {
             GeometryReader { geo in
                 let containerSize = geo.size
@@ -43,6 +61,7 @@ struct CropView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: containerSize.width, height: containerSize.height)
+                        // The initial cropping gesture
                         .gesture(
                             DragGesture(minimumDistance: 0)
                                 .onChanged { value in
@@ -54,9 +73,8 @@ struct CropView: View {
                                     }
                                 }
                                 .onEnded { _ in
-                                    creatingNewRect = false
-                                    hasReleasedInitialDrag = true
-                                }
+                                            creatingNewRect = false
+                                        }
                         )
 
                     if let rect = proposedRect {
@@ -67,6 +85,7 @@ struct CropView: View {
                             .frame(width: screenRect.width, height: screenRect.height)
                             .position(x: screenRect.midX, y: screenRect.midY)
                             .contentShape(Rectangle())
+                            // The translate gesture
                             .gesture(
                                 DragGesture()
                                     .onChanged { value in
@@ -75,7 +94,10 @@ struct CropView: View {
                                             proposedRect = translateRect(base, by: value.translation, imageBounds: displaySize)
                                         }
                                     }
-                                    .onEnded { _ in rectAtDragStart = nil }
+                                    .onEnded { _ in
+                                        rectAtDragStart = nil
+                                        creatingNewRect = false
+                                    }
                             )
 
                         ZStack {
@@ -83,6 +105,8 @@ struct CropView: View {
                             Circle().fill(Color.yellow).frame(width: 25, height: 25)
                         }
                         .position(x: screenRect.maxX, y: screenRect.maxY)
+                        // resize gestures
+                        // from bottom right first
                         .gesture(
                             DragGesture()
                                 .onChanged { value in
@@ -92,7 +116,10 @@ struct CropView: View {
                                         proposedRect = cropRect(from: anchor, to: current, aspectRatio: aspectRatio, imageBounds: displaySize)
                                     }
                                 }
-                                .onEnded { _ in resizeAnchor = nil }
+                                .onEnded { _ in
+                                    resizeAnchor = nil
+                                    creatingNewRect = false
+                                }
                         )
 
                         ZStack {
@@ -100,6 +127,7 @@ struct CropView: View {
                             Circle().fill(Color.yellow).frame(width: 25, height: 25)
                         }
                         .position(x: screenRect.minX, y: screenRect.minY)
+                        // from top left resize
                         .gesture(
                             DragGesture()
                                 .onChanged { value in
@@ -109,20 +137,39 @@ struct CropView: View {
                                         proposedRect = resizeFromTopLeft(anchor: anchor, current: current, aspectRatio: aspectRatio)
                                     }
                                 }
-                                .onEnded { _ in resizeAnchor = nil }
+                                .onEnded { _ in
+                                    resizeAnchor = nil
+                                    creatingNewRect = false
+                                }
                         )
 
-                        if hasReleasedInitialDrag {
-                            Button("Confirm Crop") {
+                        if !creatingNewRect {
+                            Button("Accept") {
                                 let pixelRect = convertToImagePixels(rect, scale: scale)
                                 croppedUIImage = croppedImage(uiImage, to: pixelRect)
                             }
                             .buttonStyle(.borderedProminent)
-                            .position(x: screenRect.midX, y: min(screenRect.maxY + 30, containerSize.height - 20))
+                            .controlSize(.small)
+                            .position(x: screenRect.midX, y: screenRect.maxY - 20)
                         }
                     }
                 }
-            }
+                .overlay(alignment: .topTrailing) {
+                    Menu {
+                        Button("Swap Canvas Dimensions") {
+                            swap(&currentCanvasWidth, &currentCanvasHeight)
+                            resetCropInProgress()
+                        }
+                        Button("Choose Different Photo") {
+                            onChooseNewPhoto()
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle.fill")
+                            .font(.title2)
+                            .padding()
+                    }
+                }
+            }.padding(.top, 24)
         }
     }
 }

@@ -45,7 +45,10 @@ struct ContentView: View {
         } else {
             Form {
                 TextField("Width", value: $width, format: .number)
+                    .keyboardType(.decimalPad)
+
                 TextField("Height", value: $height, format: .number)
+                    .keyboardType(.decimalPad)
 
                 Picker("Grid", selection: $gridSelection) {
                     ForEach(GridSelection.allCases) { option in
@@ -56,6 +59,7 @@ struct ContentView: View {
 
                 if gridSelection == .custom {
                     TextField("Square Size", value: $squareSize, format: .number)
+                        .keyboardType(.decimalPad)
                 }
 
                 if !errors.isEmpty {

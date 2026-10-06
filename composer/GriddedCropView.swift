@@ -52,12 +52,20 @@ struct GriddedCropView: View {
         )
         .overlay(alignment: .topTrailing) {
             Menu {
-                Toggle("Show Grid", isOn: $showGrid)
-                Button("Change Grid Color") { showColorPicker = true }
-                Button("Switch to 8x8 Grid") { currentGridType = .eightByEight }
-                Button("Switch to 4x4 Grid") { currentGridType = .fourByFour }
-                Button("Posterize Settings") { showPosterizeSettings = true }
-                Toggle("Black & White", isOn: $isBlackAndWhite)
+                Menu("Grid") {
+                    Toggle("Show Grid", isOn: $showGrid)
+                    Button("Change Grid Color") { showColorPicker = true }
+                    if currentGridType != .eightByEight {
+                        Button("Switch to 8x8 Grid") { currentGridType = .eightByEight }
+                    }
+                    if currentGridType != .fourByFour {
+                        Button("Switch to 4x4 Grid") { currentGridType = .fourByFour }
+                    }
+                }
+                Menu("Effects") {
+                    Button("Posterize Settings") { showPosterizeSettings = true }
+                    Toggle("Black & White", isOn: $isBlackAndWhite)
+                }
                 Button("Choose New Photo") { onChooseNewPhoto() }
             } label: {
                 Image(systemName: "ellipsis.circle.fill")
