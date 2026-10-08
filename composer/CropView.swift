@@ -21,6 +21,9 @@ struct CropView: View {
     @State private var resizeAnchor: CGPoint?
     @State private var rectAtDragStart: CGRect?
     @State private var croppedUIImage: UIImage?
+    @State private var showDimensionsEditor = false
+    @State private var editWidth: Double?
+    @State private var editHeight: Double?
 
     private var aspectRatio: CGFloat { CGFloat(currentCanvasWidth / currentCanvasHeight) }
     private var image: Image { Image(uiImage: uiImage) }
@@ -163,6 +166,11 @@ struct CropView: View {
                         Button("Choose Different Photo") {
                             onChooseNewPhoto()
                         }
+                        Button("Change Canvas Dimensions") {
+                            editWidth = currentCanvasWidth
+                            editHeight = currentCanvasHeight
+                            showDimensionsEditor = true
+                        }
                     } label: {
                         Image(systemName: "ellipsis.circle.fill")
                             .font(.title2)
@@ -170,6 +178,37 @@ struct CropView: View {
                     }
                 }
             }.padding(.top, 24)
+                .sheet(isPresented: $showDimensionsEditor) {
+                    NavigationStack {
+                        Form {
+                            TextField("Width", value: $editWidth, format: .number)
+                                .keyboardType(.decimalPad)
+                            TextField("Height", value: $editHeight, format: .number)
+                                .keyboardType(.decimalPad)
+
+                            let errors = blockingErrors(for: CanvasSettings(width: editWidth ?? 0, height: editHeight ?? 0, gridType: gridType))
+                            if !errors.isEmpty {
+                                Text(errors.joined(separator: "\n"))
+                                    .foregroundStyle(.red)
+                            }
+
+                            Button("Apply") {
+                                currentCanvasWidth = editWidth ?? currentCanvasWidth
+                                currentCanvasHeight = editHeight ?? currentCanvasHeight
+                                resetCropInProgress()
+                                showDimensionsEditor = false
+                            }
+                            .disabled(!errors.isEmpty)
+                        }
+                        .navigationTitle("Canvas Dimensions")
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Cancel") { showDimensionsEditor = false }
+                            }
+                        }
+                    }
+                    .presentationDetents([.medium])
+                }
         }
     }
 }
